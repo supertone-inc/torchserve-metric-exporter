@@ -1,0 +1,26 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: list-exec-pods
+  namespace: {{ .Values.torchserve.namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: list-pods-rolebinding
+  namespace: {{ .Values.torchserve.namespace }}
+subjects:
+- kind: ServiceAccount
+  name: ml-serve-metric-exporter
+  namespace: {{ .Values.metricExporter.namespace }}
+roleRef:
+  kind: Role
+  name: list-exec-pods
+  apiGroup: rbac.authorization.k8s.io

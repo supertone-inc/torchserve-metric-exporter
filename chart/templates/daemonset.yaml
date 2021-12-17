@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: torchserve-metric-exporter
+  namespace: {{ .Values.metricExporter.namespace }}
+  labels:
+    k8s-app: torchserve-metric-exporter
+spec:
+  selector:
+    matchLabels:
+      name: torchserve-metric-exporter
+  template:
+    metadata:
+      labels:
+        name: torchserve-metric-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      serviceAccountName: ml-serve-metric-exporter
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: torchserve-metric-exporter
+        image: {{ .Values.metricExporter.dockerImageRepo }}:{{ .Values.metricExporter.tag }}
+        args: ["--ts-address", "{{ .Values.torchserve.address }}",
+               "--ts-management-port", "{{ .Values.torchserve.managementPort }}",
+               "--exporter-address", "{{ .Values.metricExporter.serviceAddress }}",
+               "--exporter-port", "{{ .Values.metricExporter.servicePort }}",
+               "--refresh-duration-seconds", "{{ .Values.metricExporter.refreshSeconds }}",
+               "--ts-k8s-namespace", "{{ .Values.torchserve.namespace }}"]
+        ports:
+        - name: 'tme-metrics'
+          containerPort: {{ .Values.metricExporter.servicePort }}
+        resources:
+          limits:
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
