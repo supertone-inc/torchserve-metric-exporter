@@ -1,0 +1,12 @@
+metricExporter:
+  serviceAddress: "0.0.0.0"
+  servicePort: 8082
+  refreshSeconds: 10
+  dockerImageRepo: docker.io/supertone/torchserve-metric-exporter
+  tag: latest
+  namespace: metric-exporter
+
+torchserve:
+  address: "torchserve"
+  managementPort: 8081
+  namespace: torchserve
